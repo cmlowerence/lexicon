@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lexicon by QubitGyan</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#881337">
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
@@ -12,56 +21,54 @@
     <div id="auth-view" class="auth-wrapper hidden">
         <div class="auth-box">
             <div class="logo">Lexicon</div>
-            <p class="subtitle">Expand your vocabulary</p>
+            <p class="subtitle">Expand your academic vocabulary</p>
             <div class="input-group">
-                <label>Username</label>
-                <input type="text" id="username" placeholder="johndoe">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="johndoe" autocomplete="username">
             </div>
             <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="••••••••">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
             </div>
             <button id="login-btn" class="primary-btn">Sign In</button>
-            <div id="auth-error" class="error-msg"></div>
+            <div id="auth-error" class="error-msg" aria-live="polite"></div>
         </div>
     </div>
 
     <div id="app-view" class="app-layout hidden">
-        
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">Lexicon</div>
             </div>
             <nav class="nav-menu">
-                <button class="nav-item active" data-target="wotd-section">
+                <button class="nav-item active" data-target="wotd-section" aria-label="Word of the Day">
                     <i class="ph ph-star"></i> <span>Word of the Day</span>
                 </button>
-                <button class="nav-item" data-target="practice-section">
+                <button class="nav-item" data-target="practice-section" aria-label="Daily Practice">
                     <i class="ph ph-cards"></i> <span>Daily Practice</span>
                 </button>
-                <button class="nav-item" data-target="search-section">
+                <button class="nav-item" data-target="search-section" aria-label="Dictionary Search">
                     <i class="ph ph-magnifying-glass"></i> <span>Dictionary</span>
                 </button>
-                <button class="nav-item" data-target="trending-section">
+                <button class="nav-item" data-target="trending-section" aria-label="Trending Words">
                     <i class="ph ph-trend-up"></i> <span>Trending</span>
                 </button>
             </nav>
             <div class="sidebar-footer">
-                <button id="logout-btn" class="nav-item text-danger">
+                <button id="logout-btn" class="nav-item text-danger" aria-label="Logout">
                     <i class="ph ph-sign-out"></i> <span>Logout</span>
                 </button>
             </div>
         </aside>
 
         <main class="main-content">
-            
             <section id="wotd-section" class="content-section active">
                 <header class="section-header">
                     <h1>Word of the Day</h1>
                     <p class="date-display" id="wotd-date"></p>
                 </header>
                 <div id="wotd-container" class="card-container">
-                    <div class="loader"><i class="ph ph-spinner ph-spin"></i> Loading...</div>
+                    <div class="loader" aria-live="polite"><i class="ph ph-spinner ph-spin"></i> Loading...</div>
                 </div>
             </section>
 
@@ -70,16 +77,15 @@
                     <h1>Daily Practice Set</h1>
                     <p>Master these words to improve your Lexicon. <span class="desktop-only">(Use ⬅️ ➡️ keys to navigate)</span></p>
                 </header>
-                <div id="practice-container" class="card-container">
-                    </div>
+                <div id="practice-container" class="card-container"></div>
             </section>
 
             <section id="search-section" class="content-section hidden">
                 <header class="section-header">
-                    <h1>Dictionary</h1>
+                    <h1>Dictionary Library</h1>
                     <div class="search-bar">
-                        <i class="ph ph-magnifying-glass"></i>
-                        <input type="text" id="search-input" placeholder="Search for any word...">
+                        <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                        <input type="text" id="search-input" placeholder="Search the lexicon...">
                         <button id="search-btn" class="primary-btn small">Search</button>
                     </div>
                     <div class="search-history hidden" id="search-history-container">
@@ -98,13 +104,12 @@
             <section id="trending-section" class="content-section hidden">
                 <header class="section-header">
                     <h1>Trending Words</h1>
-                    <p>What the community is searching for.</p>
+                    <p>What the community is searching for today.</p>
                 </header>
                 <div id="trending-container" class="trending-grid">
-                    <div class="loader"><i class="ph ph-spinner ph-spin"></i> Loading trends...</div>
+                    <div class="loader" aria-live="polite"><i class="ph ph-spinner ph-spin"></i> Loading trends...</div>
                 </div>
             </section>
-
         </main>
     </div>
 
@@ -113,12 +118,8 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(registration => {
-            console.log('Service Worker registered with scope:', registration.scope);
-          })
-          .catch(error => {
-            console.error('Service Worker registration failed:', error);
-          });
+          .then(registration => console.log('Service Worker registered.'))
+          .catch(error => console.error('Service Worker registration failed:', error));
       });
     }
     </script>

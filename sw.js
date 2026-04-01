@@ -1,12 +1,13 @@
-const CACHE_NAME = 'lexicon-cache-v1';
+const CACHE_NAME = 'lexicon-cache-v2';
 const urlsToCache = [
   './',
   './index.html',
   './style.css',
-  './script.js'
+  './script.js',
+  './icon.png',
+  './manifest.json'
 ];
 
-// Step 1: Install the service worker and cache the files
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -17,12 +18,15 @@ self.addEventListener('install', event => {
   );
 });
 
-// Step 2: Intercept network requests and serve from cache if available
 self.addEventListener('fetch', event => {
+  // CRITICAL: Do not cache POST requests (Logins) or dynamic API requests
+  if (event.request.method !== 'GET' || event.request.url.includes('/api/')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Return the cached file if found, otherwise fetch from the internet
         return response || fetch(event.request);
       })
   );

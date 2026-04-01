@@ -17,7 +17,6 @@ const passwordInput = document.getElementById('password');
 const navItems = document.querySelectorAll('.nav-item[data-target]');
 const sections = document.querySelectorAll('.content-section');
 
-// Section Containers
 const wotdContainer = document.getElementById('wotd-container');
 const practiceContainer = document.getElementById('practice-container');
 const searchInput = document.getElementById('search-input');
@@ -25,7 +24,6 @@ const searchBtn = document.getElementById('search-btn');
 const searchResultContainer = document.getElementById('search-result-container');
 const trendingContainer = document.getElementById('trending-container');
 
-// Search History Elements
 const searchHistoryContainer = document.getElementById('search-history-container');
 const recentSearchesList = document.getElementById('recent-searches-list');
 
@@ -40,7 +38,7 @@ function checkAuth() {
     if (token) {
         authView.classList.add('hidden');
         appView.classList.remove('hidden');
-        loadSection('wotd-section'); // Default to WOTD
+        loadSection('wotd-section');
         renderSearchHistory();
     } else {
         appView.classList.add('hidden');
@@ -146,7 +144,6 @@ function loadSection(sectionId) {
     navItems.forEach(nav => nav.classList.remove('active'));
     document.querySelector(`.nav-item[data-target="${sectionId}"]`)?.classList.add('active');
 
-    // Trigger data fetching based on section
     if (sectionId === 'wotd-section') fetchWOTD();
     if (sectionId === 'practice-section') fetchPracticeSet();
     if (sectionId === 'trending-section') fetchTrending();
@@ -172,7 +169,7 @@ function saveToSearchHistory(word) {
     let history = JSON.parse(localStorage.getItem('lexicon_history') || '[]');
     history = history.filter(w => w.toLowerCase() !== word.toLowerCase());
     history.unshift(word);
-    if (history.length > 10) history.pop(); // Keep top 10
+    if (history.length > 10) history.pop(); 
     
     localStorage.setItem('lexicon_history', JSON.stringify(history));
     renderSearchHistory();
@@ -183,7 +180,7 @@ function renderSearchHistory() {
     if (history.length > 0) {
         searchHistoryContainer.classList.remove('hidden');
         recentSearchesList.innerHTML = history.map(word => 
-            `<div class="history-pill" onclick="searchFromTag('${word}')"><i class="ph ph-clock-counter-clockwise"></i> ${word}</div>`
+            `<button class="history-pill" onclick="searchFromTag('${word}')" aria-label="Search for ${word}"><i class="ph ph-clock-counter-clockwise"></i> ${word}</button>`
         ).join('');
     } else {
         searchHistoryContainer.classList.add('hidden');
@@ -198,12 +195,10 @@ window.searchFromTag = function(wordText) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-
 // --- UI Components ---
 function generateWordCardHTML(word, context = 'default') {
     if (!word) return '<div class="error-msg">Word data unavailable.</div>';
 
-    // 1. Process Pronunciations 
     let audioControls = '';
     if (word.pronunciations && word.pronunciations.length > 0) {
         const sortedProns = [...word.pronunciations].sort((a, b) => {
@@ -214,13 +209,12 @@ function generateWordCardHTML(word, context = 'default') {
         });
 
         audioControls = sortedProns.map(p => `
-            <button class="audio-btn" onclick="playAudio(this, '${p.audio_url}')" title="${p.region} Pronunciation">
+            <button class="audio-btn" onclick="playAudio(this, '${p.audio_url}')" aria-label="Play ${p.region} Pronunciation">
                 <i class="ph-fill ph-speaker-high"></i> ${p.region}
             </button>
         `).join('');
     }
 
-    // 2. Process Meanings
     const meaningsHtml = (word.meanings || []).map(m => `
         <div class="meaning-block">
             <span class="badge">${m.part_of_speech}</span>
@@ -229,21 +223,19 @@ function generateWordCardHTML(word, context = 'default') {
         </div>
     `).join('');
 
-    // 3. Process Thesaurus (Clickable)
     const synonyms = (word.thesaurus_entries || []).filter(t => t.relation_type === 'SYN').slice(0, 8);
     const antonyms = (word.thesaurus_entries || []).filter(t => t.relation_type === 'ANT').slice(0, 8);
     
     let thesaurusHtml = '';
     if (synonyms.length > 0) {
         thesaurusHtml += `<span class="thesaurus-label">Synonyms (Click to explore)</span><div class="thesaurus-grid">` + 
-            synonyms.map(t => `<span class="syn-tag" onclick="searchFromTag('${t.related_word}')">${t.related_word} <i class="ph ph-arrow-up-right"></i></span>`).join('') + `</div>`;
+            synonyms.map(t => `<button class="syn-tag" onclick="searchFromTag('${t.related_word}')">${t.related_word} <i class="ph ph-arrow-up-right"></i></button>`).join('') + `</div>`;
     }
     if (antonyms.length > 0) {
         thesaurusHtml += `<span class="thesaurus-label">Antonyms (Click to explore)</span><div class="thesaurus-grid">` + 
-            antonyms.map(t => `<span class="ant-tag" onclick="searchFromTag('${t.related_word}')">${t.related_word} <i class="ph ph-arrow-up-right"></i></span>`).join('') + `</div>`;
+            antonyms.map(t => `<button class="ant-tag" onclick="searchFromTag('${t.related_word}')">${t.related_word} <i class="ph ph-arrow-up-right"></i></button>`).join('') + `</div>`;
     }
 
-    // 4. Build Card Structure
     let cardHtml = `
         <div class="word-card">
             <div class="word-header">
@@ -263,7 +255,6 @@ function generateWordCardHTML(word, context = 'default') {
             </div>
     `;
 
-    // Static Footer for Practice Controls
     if (context === 'practice') {
         const isFirst = currentPracticeIndex === 0;
         const isLast = currentPracticeIndex === practiceWords.length - 1;
@@ -289,7 +280,7 @@ function generateWordCardHTML(word, context = 'default') {
 // --- Section Fetchers ---
 
 async function fetchWOTD() {
-    wotdContainer.innerHTML = '<div class="loader"><i class="ph ph-spinner ph-spin"></i> Loading...</div>';
+    wotdContainer.innerHTML = '<div class="loader" aria-live="polite"><i class="ph ph-spinner ph-spin"></i> Loading...</div>';
     try {
         const data = await fetchWithAuth('/api/v2/lexicon/public/word-of-the-day/');
         if (data && data.word) {
@@ -309,7 +300,7 @@ async function fetchPracticeSet() {
         return;
     }
 
-    practiceContainer.innerHTML = '<div class="loader"><i class="ph ph-spinner ph-spin"></i> Generating your daily set...</div>';
+    practiceContainer.innerHTML = '<div class="loader" aria-live="polite"><i class="ph ph-spinner ph-spin"></i> Generating your daily set...</div>';
     try {
         const data = await fetchWithAuth('/api/v2/lexicon/public/daily-practice/');
         if (data && data.words && data.words.length > 0) {
@@ -329,7 +320,6 @@ function renderPracticeCard() {
     const word = practiceWords[currentPracticeIndex];
     practiceContainer.innerHTML = generateWordCardHTML(word, 'practice');
     
-    // Reset scroll position of the inner body
     const bodyScroll = document.getElementById('word-scroll-body');
     if (bodyScroll) bodyScroll.scrollTop = 0;
 }
@@ -346,7 +336,7 @@ async function executeSearch() {
     const query = searchInput.value.trim();
     if (!query) return;
 
-    searchResultContainer.innerHTML = '<div class="loader"><i class="ph ph-spinner ph-spin"></i> Searching Dictionary...</div>';
+    searchResultContainer.innerHTML = '<div class="loader" aria-live="polite"><i class="ph ph-spinner ph-spin"></i> Searching Dictionary...</div>';
     searchBtn.disabled = true;
 
     try {
@@ -366,12 +356,12 @@ async function executeSearch() {
 }
 
 async function fetchTrending() {
-    trendingContainer.innerHTML = '<div class="loader"><i class="ph ph-spinner ph-spin"></i> Loading Trends...</div>';
+    trendingContainer.innerHTML = '<div class="loader" aria-live="polite"><i class="ph ph-spinner ph-spin"></i> Loading Trends...</div>';
     try {
         const data = await fetchWithAuth('/api/v2/lexicon/public/trending/');
         if (data && data.length > 0) {
             trendingContainer.innerHTML = data.map(word => `
-                <div class="trending-card" onclick="searchFromTag('${word.text}')">
+                <div class="trending-card" onclick="searchFromTag('${word.text}')" tabindex="0" role="button">
                     <div>
                         <h3>${word.text}</h3>
                         <p>${word.meanings?.[0]?.definition?.substring(0, 60) || 'No definition available'}...</p>
