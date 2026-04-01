@@ -40,7 +40,7 @@ function checkAuth() {
     if (token) {
         authView.classList.add('hidden');
         appView.classList.remove('hidden');
-        loadSection('wotd-section'); // Default view
+        loadSection('wotd-section'); // Default to WOTD
         renderSearchHistory();
     } else {
         appView.classList.add('hidden');
@@ -58,7 +58,7 @@ async function login() {
         return;
     }
 
-    loginBtn.textContent = 'Signing in...';
+    loginBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Signing in...';
     loginBtn.disabled = true;
 
     try {
@@ -85,7 +85,7 @@ async function login() {
     } catch (error) {
         authError.textContent = error.message;
     } finally {
-        loginBtn.textContent = 'Sign In';
+        loginBtn.innerHTML = 'Sign In';
         loginBtn.disabled = false;
     }
 }
@@ -155,8 +155,6 @@ function loadSection(sectionId) {
 // --- Global Audio Handler ---
 function playAudio(btnElement, url) {
     const audio = new Audio(url);
-    
-    // Add visual feedback
     btnElement.classList.add('playing');
     
     audio.play().catch(e => {
@@ -164,7 +162,6 @@ function playAudio(btnElement, url) {
         btnElement.classList.remove('playing');
     });
 
-    // Remove feedback when done
     audio.onended = () => {
         btnElement.classList.remove('playing');
     };
@@ -173,11 +170,9 @@ function playAudio(btnElement, url) {
 // --- Recent Search History Logic ---
 function saveToSearchHistory(word) {
     let history = JSON.parse(localStorage.getItem('lexicon_history') || '[]');
-    // Remove if already exists to move it to the front
     history = history.filter(w => w.toLowerCase() !== word.toLowerCase());
     history.unshift(word);
-    // Keep only last 10 searches
-    if (history.length > 10) history.pop();
+    if (history.length > 10) history.pop(); // Keep top 10
     
     localStorage.setItem('lexicon_history', JSON.stringify(history));
     renderSearchHistory();
@@ -195,7 +190,7 @@ function renderSearchHistory() {
     }
 }
 
-// --- Deep Linking: Search from Tags/Synonyms ---
+// Deep Linking Function
 window.searchFromTag = function(wordText) {
     loadSection('search-section');
     searchInput.value = wordText;
@@ -234,21 +229,21 @@ function generateWordCardHTML(word, context = 'default') {
         </div>
     `).join('');
 
-    // 3. Process Thesaurus (NEW: Clickable Tags)
+    // 3. Process Thesaurus (Clickable)
     const synonyms = (word.thesaurus_entries || []).filter(t => t.relation_type === 'SYN').slice(0, 8);
     const antonyms = (word.thesaurus_entries || []).filter(t => t.relation_type === 'ANT').slice(0, 8);
     
     let thesaurusHtml = '';
     if (synonyms.length > 0) {
-        thesaurusHtml += `<span class="thesaurus-label">Synonyms (Click to search)</span><div class="thesaurus-grid">` + 
+        thesaurusHtml += `<span class="thesaurus-label">Synonyms (Click to explore)</span><div class="thesaurus-grid">` + 
             synonyms.map(t => `<span class="syn-tag" onclick="searchFromTag('${t.related_word}')">${t.related_word} <i class="ph ph-arrow-up-right"></i></span>`).join('') + `</div>`;
     }
     if (antonyms.length > 0) {
-        thesaurusHtml += `<span class="thesaurus-label">Antonyms (Click to search)</span><div class="thesaurus-grid">` + 
+        thesaurusHtml += `<span class="thesaurus-label">Antonyms (Click to explore)</span><div class="thesaurus-grid">` + 
             antonyms.map(t => `<span class="ant-tag" onclick="searchFromTag('${t.related_word}')">${t.related_word} <i class="ph ph-arrow-up-right"></i></span>`).join('') + `</div>`;
     }
 
-    // 4. Build Card
+    // 4. Build Card Structure
     let cardHtml = `
         <div class="word-card">
             <div class="word-header">
@@ -262,22 +257,28 @@ function generateWordCardHTML(word, context = 'default') {
                 </div>
             </div>
             
-            <div class="word-body">
+            <div class="word-body" id="word-scroll-body">
                 ${meaningsHtml}
                 ${thesaurusHtml}
             </div>
     `;
 
-    // Add Practice Navigation if in Practice Context
+    // Static Footer for Practice Controls
     if (context === 'practice') {
         const isFirst = currentPracticeIndex === 0;
         const isLast = currentPracticeIndex === practiceWords.length - 1;
         cardHtml += `
-            <div class="card-controls">
-                <button class="secondary-btn" id="prev-btn" ${isFirst ? 'disabled' : ''} onclick="navigatePractice(-1)">Previous Word</button>
-                <button class="secondary-btn" id="next-btn" ${isLast ? 'disabled' : ''} onclick="navigatePractice(1)">Next Word</button>
+            <div class="card-footer">
+                <div class="card-controls">
+                    <button class="secondary-btn" id="prev-btn" ${isFirst ? 'disabled' : ''} onclick="navigatePractice(-1)">
+                        <i class="ph ph-arrow-left"></i> Previous
+                    </button>
+                    <button class="primary-btn" id="next-btn" ${isLast ? 'disabled' : ''} onclick="navigatePractice(1)">
+                        Next <i class="ph ph-arrow-right"></i>
+                    </button>
+                </div>
+                <div class="card-counter">${currentPracticeIndex + 1} of ${practiceWords.length} Words</div>
             </div>
-            <div class="card-counter">${currentPracticeIndex + 1} of ${practiceWords.length} Words</div>
         `;
     }
 
@@ -327,7 +328,10 @@ function renderPracticeCard() {
     if (practiceWords.length === 0) return;
     const word = practiceWords[currentPracticeIndex];
     practiceContainer.innerHTML = generateWordCardHTML(word, 'practice');
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Reset scroll to top of card
+    
+    // Reset scroll position of the inner body
+    const bodyScroll = document.getElementById('word-scroll-body');
+    if (bodyScroll) bodyScroll.scrollTop = 0;
 }
 
 window.navigatePractice = function(direction) {
@@ -348,10 +352,7 @@ async function executeSearch() {
     try {
         const data = await fetchWithAuth(`/api/v2/lexicon/public/search/?word=${encodeURIComponent(query)}&lang=en`);
         searchResultContainer.innerHTML = generateWordCardHTML(data, 'default');
-        
-        // Save successful search to history
         saveToSearchHistory(data.text);
-
     } catch (err) {
         searchResultContainer.innerHTML = `
             <div class="empty-state">
@@ -386,7 +387,6 @@ async function fetchTrending() {
     }
 }
 
-
 // --- Event Listeners ---
 loginBtn.addEventListener('click', login);
 passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') login(); });
@@ -405,11 +405,8 @@ searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') execute
 // Keyboard Navigation for Practice Mode
 document.addEventListener('keydown', (e) => {
     if (currentActiveSection === 'practice-section' && document.activeElement !== searchInput) {
-        if (e.key === 'ArrowLeft') {
-            navigatePractice(-1);
-        } else if (e.key === 'ArrowRight') {
-            navigatePractice(1);
-        }
+        if (e.key === 'ArrowLeft') navigatePractice(-1);
+        else if (e.key === 'ArrowRight') navigatePractice(1);
     }
 });
 
