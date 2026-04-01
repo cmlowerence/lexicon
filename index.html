@@ -223,32 +223,40 @@
         }
 
         async function login() {
-            const username = usernameInput.value;
-            const password = passwordInput.value;
-            authError.textContent = '';
-            loginBtn.textContent = 'Signing in...';
+    const username = usernameInput.value;
+    const password = passwordInput.value;
+    authError.textContent = '';
+    loginBtn.textContent = 'Signing in...';
 
-            try {
-                const response = await fetch(`${API_BASE}/api/token/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
+    try {
+        // Updated to hit your specific token generation endpoint
+        const response = await fetch(`${API_BASE}/api-auth/login/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
 
-                if (!response.ok) throw new Error('Invalid credentials');
-
-                const data = await response.json();
-                localStorage.setItem('access_token', data.access);
-                localStorage.setItem('refresh_token', data.refresh);
-                
-                checkAuth();
-            } catch (error) {
-                authError.textContent = error.message;
-            } finally {
-                loginBtn.textContent = 'Sign In';
-            }
+        if (!response.ok) {
+            throw new Error('Invalid credentials or network issue');
         }
 
+        const data = await response.json();
+        
+        // Storing the token (adjust 'data.access' if your API returns it as 'data.token')
+        localStorage.setItem('access_token', data.access || data.token);
+        
+        // If your endpoint also returns a refresh token, store it
+        if (data.refresh) {
+            localStorage.setItem('refresh_token', data.refresh);
+        }
+        
+        checkAuth();
+    } catch (error) {
+        authError.textContent = error.message;
+    } finally {
+        loginBtn.textContent = 'Sign In';
+    }
+}
         function logout() {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
