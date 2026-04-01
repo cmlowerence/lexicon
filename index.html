@@ -3,406 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lexicon - QubitGyan</title>
-    <style>
-        :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --bg-color: #F3F4F6;
-            --card-bg: #FFFFFF;
-            --text-main: #111827;
-            --text-muted: #6B7280;
-            --border: #E5E7EB;
-            --success: #10B981;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* Container & Auth UI */
-        #app-container {
-            width: 100%;
-            max-width: 600px;
-            padding: 20px;
-        }
-
-        .hidden { display: none !important; }
-
-        .auth-box {
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-
-        .auth-box h1 { margin-bottom: 24px; font-size: 24px; color: var(--primary); }
-
-        .input-group { margin-bottom: 16px; text-align: left; }
-        .input-group label { display: block; font-size: 14px; margin-bottom: 6px; color: var(--text-muted); }
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .input-group input:focus { border-color: var(--primary); }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        button:hover { background: var(--primary-hover); }
-
-        .error-msg { color: #EF4444; font-size: 14px; margin-top: 10px; min-height: 20px; }
-
-        /* Lexicon Dashboard UI */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        header h2 { color: var(--text-main); }
-        .logout-btn { background: transparent; color: var(--text-muted); width: auto; padding: 8px 16px; border: 1px solid var(--border); }
-        .logout-btn:hover { background: var(--border); color: var(--text-main); }
-
-        /* Flashcard Design */
-        .flashcard {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            position: relative;
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .word-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .word-title { font-size: 42px; font-weight: 800; text-transform: capitalize; margin-bottom: 10px; }
-        .word-meta { display: flex; justify-content: center; align-items: center; gap: 12px; color: var(--text-muted); font-size: 18px; }
-        
-        .play-audio {
-            background: #EEF2FF;
-            color: var(--primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            padding: 0;
-        }
-        .play-audio:hover { background: #E0E7FF; }
-        .play-audio svg { width: 20px; height: 20px; fill: currentColor; }
-
-        .meanings-container { flex-grow: 1; overflow-y: auto; max-height: 350px; padding-right: 10px; }
-        .meaning-block { margin-bottom: 24px; }
-        .part-of-speech {
-            display: inline-block;
-            background: #F3F4F6;
-            color: var(--text-muted);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-        .definition { font-size: 18px; line-height: 1.5; color: var(--text-main); margin-bottom: 8px; }
-        .example { font-size: 15px; font-style: italic; color: var(--text-muted); border-left: 3px solid var(--border); padding-left: 12px; }
-
-        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
-        .synonym-tag { background: #ECFDF5; color: var(--success); padding: 4px 12px; border-radius: 16px; font-size: 13px; }
-
-        .card-controls {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            gap: 16px;
-        }
-        .btn-nav { background: var(--bg-color); color: var(--text-main); flex: 1; }
-        .btn-nav:hover { background: var(--border); }
-        .btn-nav:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* Custom Scrollbar for meanings */
-        .meanings-container::-webkit-scrollbar { width: 6px; }
-        .meanings-container::-webkit-scrollbar-track { background: transparent; }
-        .meanings-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-    </style>
+    <title>Lexicon by QubitGyan</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
 
-    <div id="app-container">
-        <div id="auth-view" class="auth-box hidden">
-            <h1>Lexicon Login</h1>
+    <div id="auth-view" class="auth-wrapper">
+        <div class="auth-box">
+            <div class="logo">Lexicon</div>
+            <p class="subtitle">Expand your vocabulary</p>
             <div class="input-group">
                 <label>Username</label>
-                <input type="text" id="username" placeholder="Enter your username">
+                <input type="text" id="username" placeholder="johndoe">
             </div>
             <div class="input-group">
                 <label>Password</label>
-                <input type="password" id="password" placeholder="Enter your password">
+                <input type="password" id="password" placeholder="••••••••">
             </div>
-            <button id="login-btn">Sign In</button>
+            <button id="login-btn" class="primary-btn">Sign In</button>
             <div id="auth-error" class="error-msg"></div>
-        </div>
-
-        <div id="dashboard-view" class="hidden">
-            <header>
-                <h2>Daily Practice</h2>
-                <button id="logout-btn" class="logout-btn">Logout</button>
-            </header>
-            
-            <div id="flashcard-container">
-                </div>
         </div>
     </div>
 
-    <script>
-        const API_BASE = 'https://qubitgyan-api.onrender.com';
+    <div id="app-view" class="app-layout hidden">
         
-        // DOM Elements
-        const authView = document.getElementById('auth-view');
-        const dashboardView = document.getElementById('dashboard-view');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const loginBtn = document.getElementById('login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const authError = document.getElementById('auth-error');
-        const flashcardContainer = document.getElementById('flashcard-container');
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">Lexicon</div>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" data-target="wotd-section">
+                    <i class="ph ph-star"></i> Word of the Day
+                </button>
+                <button class="nav-item" data-target="practice-section">
+                    <i class="ph ph-cards"></i> Daily Practice
+                </button>
+                <button class="nav-item" data-target="search-section">
+                    <i class="ph ph-magnifying-glass"></i> Dictionary
+                </button>
+                <button class="nav-item" data-target="trending-section">
+                    <i class="ph ph-trend-up"></i> Trending
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="nav-item text-danger">
+                    <i class="ph ph-sign-out"></i> Logout
+                </button>
+            </div>
+        </aside>
 
-        // State
-        let currentWords = [];
-        let currentIndex = 0;
-
-        // --- Auth Logic ---
-        function checkAuth() {
-            const token = localStorage.getItem('access_token');
-            if (token) {
-                authView.classList.add('hidden');
-                dashboardView.classList.remove('hidden');
-                loadDailyPractice();
-            } else {
-                dashboardView.classList.add('hidden');
-                authView.classList.remove('hidden');
-            }
-        }
-
-        async function login() {
-            const username = usernameInput.value;
-            const password = passwordInput.value;
-            authError.textContent = '';
-            loginBtn.textContent = 'Signing in...';
-        
-            try {
-                // Hitting the SimpleJWT token endpoint directly
-                const response = await fetch(`${API_BASE}/api/token/`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-        
-                if (!response.ok) {
-                    // Attempt to grab the specific error message from DRF
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.detail || 'Invalid username or password');
-                }
-        
-                const data = await response.json();
-                
-                // SimpleJWT returns 'access' and 'refresh' payload keys
-                localStorage.setItem('access_token', data.access);
-                localStorage.setItem('refresh_token', data.refresh);
-                
-                // Switch views to the Lexicon dashboard
-                checkAuth();
-                
-            } catch (error) {
-                authError.textContent = error.message;
-            } finally {
-                loginBtn.textContent = 'Sign In';
-            }
-        }
-        
-        function logout() {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            usernameInput.value = '';
-            passwordInput.value = '';
-            checkAuth();
-        }
-
-        // --- Data Fetching ---
-        async function fetchWithAuth(endpoint) {
-            let token = localStorage.getItem('access_token');
+        <main class="main-content">
             
-            let response = await fetch(`${API_BASE}${endpoint}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            // Handle token expiration (Basic implementation)
-            if (response.status === 401) {
-                const refresh = localStorage.getItem('refresh_token');
-                const refreshRes = await fetch(`${API_BASE}/api/token/refresh/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ refresh })
-                });
-
-                if (refreshRes.ok) {
-                    const data = await refreshRes.json();
-                    localStorage.setItem('access_token', data.access);
-                    // Retry original request
-                    response = await fetch(`${API_BASE}${endpoint}`, {
-                        headers: { 'Authorization': `Bearer ${data.access}` }
-                    });
-                } else {
-                    logout();
-                    throw new Error('Session expired');
-                }
-            }
-            return response.json();
-        }
-
-        async function loadDailyPractice() {
-            flashcardContainer.innerHTML = '<p style="text-align:center;">Loading today\'s words...</p>';
-            try {
-                // In production, uncomment the real fetch:
-                // const data = await fetchWithAuth('/api/v2/lexicon/public/daily-practice/');
-                // currentWords = data.words;
-                
-                // Using provided JSON payload for immediate UI demonstration
-                const mockData = {
-                    "words": [
-                        {
-                            "text": "dichotomy",
-                            "phonetic_text": "/daɪˈkɒtəmi/",
-                            "pronunciations": [{"audio_url": "https://api.dictionaryapi.dev/media/pronunciations/en/dichotomy-us.mp3"}],
-                            "meanings": [
-                                {"part_of_speech": "noun", "definition": "A separation or division into two; a distinction that results in such a division.", "example": "A rigid dichotomy between science and mysticism."}
-                            ],
-                            "thesaurus_entries": [{"related_word": "partition"}, {"related_word": "trichotomy"}]
-                        },
-                        {
-                            "text": "spectacular",
-                            "phonetic_text": "/spɛkˈtæk.jʊ.lə/",
-                            "pronunciations": [{"audio_url": "https://media.merriam-webster.com/audio/prons/en/us/mp3/s/specta03.mp3"}],
-                            "meanings": [
-                                {"part_of_speech": "adjective", "definition": "Amazing or worthy of special notice.", "example": "The parachutists were spectacular."}
-                            ],
-                            "thesaurus_entries": [{"related_word": "extravagant"}, {"related_word": "breathtaking"}]
-                        }
-                    ]
-                };
-                
-                currentWords = mockData.words;
-                currentIndex = 0;
-                renderCard();
-
-            } catch (error) {
-                flashcardContainer.innerHTML = `<p style="text-align:center; color:red;">Failed to load words.</p>`;
-            }
-        }
-
-        // --- UI Rendering ---
-        function renderCard() {
-            if (!currentWords || currentWords.length === 0) return;
-            
-            const word = currentWords[currentIndex];
-            const audioUrl = word.pronunciations?.[0]?.audio_url || '';
-            
-            const meaningsHtml = word.meanings.map(m => `
-                <div class="meaning-block">
-                    <span class="part-of-speech">${m.part_of_speech}</span>
-                    <p class="definition">${m.definition}</p>
-                    ${m.example ? `<p class="example">"${m.example}"</p>` : ''}
+            <section id="wotd-section" class="content-section active">
+                <header class="section-header">
+                    <h1>Word of the Day</h1>
+                    <p class="date-display" id="wotd-date"></p>
+                </header>
+                <div id="wotd-container" class="card-container">
+                    <div class="loader">Loading Word of the Day...</div>
                 </div>
-            `).join('');
+            </section>
 
-            const synonymsHtml = (word.thesaurus_entries || []).slice(0, 5).map(t => 
-                `<span class="synonym-tag">${t.related_word}</span>`
-            ).join('');
-
-            flashcardContainer.innerHTML = `
-                <div class="flashcard">
-                    <div class="word-header">
-                        <h3 class="word-title">${word.text}</h3>
-                        <div class="word-meta">
-                            <span>${word.phonetic_text || ''}</span>
-                            ${audioUrl ? `
-                            <button class="play-audio" onclick="new Audio('${audioUrl}').play()">
-                                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                            </button>` : ''}
-                        </div>
+            <section id="practice-section" class="content-section hidden">
+                <header class="section-header">
+                    <h1>Daily Practice Set</h1>
+                    <p>Master these words to improve your Lexicon.</p>
+                </header>
+                <div id="practice-container" class="card-container">
                     </div>
-                    
-                    <div class="meanings-container">
-                        ${meaningsHtml}
-                        ${synonymsHtml ? `
-                        <div class="tags-container">
-                            <strong>Synonyms:</strong> ${synonymsHtml}
-                        </div>` : ''}
-                    </div>
+            </section>
 
-                    <div class="card-controls">
-                        <button class="btn-nav" id="prev-btn" ${currentIndex === 0 ? 'disabled' : ''}>Previous</button>
-                        <button class="btn-nav" id="next-btn" ${currentIndex === currentWords.length - 1 ? 'disabled' : ''}>Next</button>
+            <section id="search-section" class="content-section hidden">
+                <header class="section-header">
+                    <h1>Dictionary</h1>
+                    <div class="search-bar">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" id="search-input" placeholder="Search for any word...">
+                        <button id="search-btn" class="primary-btn small">Search</button>
+                    </div>
+                </header>
+                <div id="search-result-container" class="card-container">
+                    <div class="empty-state">
+                        <i class="ph ph-books"></i>
+                        <p>Search for a word to see its definition, origin, and pronunciation.</p>
                     </div>
                 </div>
-            `;
+            </section>
 
-            document.getElementById('prev-btn')?.addEventListener('click', () => {
-                if (currentIndex > 0) { currentIndex--; renderCard(); }
-            });
-            document.getElementById('next-btn')?.addEventListener('click', () => {
-                if (currentIndex < currentWords.length - 1) { currentIndex++; renderCard(); }
-            });
-        }
+            <section id="trending-section" class="content-section hidden">
+                <header class="section-header">
+                    <h1>Trending Words</h1>
+                    <p>What the community is searching for.</p>
+                </header>
+                <div id="trending-container" class="trending-grid">
+                    <div class="loader">Loading trends...</div>
+                </div>
+            </section>
 
-        // Event Listeners
-        loginBtn.addEventListener('click', login);
-        logoutBtn.addEventListener('click', logout);
-        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') login(); });
+        </main>
+    </div>
 
-        // Initialize
-        checkAuth();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
