@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <div id="auth-view" class="auth-wrapper">
+    <div id="auth-view" class="auth-wrapper hidden">
         <div class="auth-box">
             <div class="logo">Lexicon</div>
             <p class="subtitle">Expand your vocabulary</p>
@@ -34,21 +34,21 @@
             </div>
             <nav class="nav-menu">
                 <button class="nav-item active" data-target="wotd-section">
-                    <i class="ph ph-star"></i> Word of the Day
+                    <i class="ph ph-star"></i> <span>Word of the Day</span>
                 </button>
                 <button class="nav-item" data-target="practice-section">
-                    <i class="ph ph-cards"></i> Daily Practice
+                    <i class="ph ph-cards"></i> <span>Daily Practice</span>
                 </button>
                 <button class="nav-item" data-target="search-section">
-                    <i class="ph ph-magnifying-glass"></i> Dictionary
+                    <i class="ph ph-magnifying-glass"></i> <span>Dictionary</span>
                 </button>
                 <button class="nav-item" data-target="trending-section">
-                    <i class="ph ph-trend-up"></i> Trending
+                    <i class="ph ph-trend-up"></i> <span>Trending</span>
                 </button>
             </nav>
             <div class="sidebar-footer">
                 <button id="logout-btn" class="nav-item text-danger">
-                    <i class="ph ph-sign-out"></i> Logout
+                    <i class="ph ph-sign-out"></i> <span>Logout</span>
                 </button>
             </div>
         </aside>
@@ -61,14 +61,14 @@
                     <p class="date-display" id="wotd-date"></p>
                 </header>
                 <div id="wotd-container" class="card-container">
-                    <div class="loader">Loading Word of the Day...</div>
+                    <div class="loader"><i class="ph ph-spinner ph-spin"></i> Loading...</div>
                 </div>
             </section>
 
             <section id="practice-section" class="content-section hidden">
                 <header class="section-header">
                     <h1>Daily Practice Set</h1>
-                    <p>Master these words to improve your Lexicon.</p>
+                    <p>Master these words to improve your Lexicon. <span class="desktop-only">(Use ⬅️ ➡️ keys to navigate)</span></p>
                 </header>
                 <div id="practice-container" class="card-container">
                     </div>
@@ -81,6 +81,10 @@
                         <i class="ph ph-magnifying-glass"></i>
                         <input type="text" id="search-input" placeholder="Search for any word...">
                         <button id="search-btn" class="primary-btn small">Search</button>
+                    </div>
+                    <div class="search-history hidden" id="search-history-container">
+                        <p class="history-label">Recent Searches:</p>
+                        <div id="recent-searches-list" class="history-list"></div>
                     </div>
                 </header>
                 <div id="search-result-container" class="card-container">
@@ -97,7 +101,7 @@
                     <p>What the community is searching for.</p>
                 </header>
                 <div id="trending-container" class="trending-grid">
-                    <div class="loader">Loading trends...</div>
+                    <div class="loader"><i class="ph ph-spinner ph-spin"></i> Loading trends...</div>
                 </div>
             </section>
 
