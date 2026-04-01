@@ -18,13 +18,14 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif; background: var(--bg-main); color: var(--text-base); line-height: 1.5; }
 .hidden { display: none !important; }
+.desktop-only { display: inline; color: var(--text-muted); font-size: 13px; font-weight: normal; }
 
 /* Buttons & Inputs */
 .primary-btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
 .primary-btn:hover { background: var(--primary-hover); }
 .primary-btn.small { padding: 8px 16px; font-size: 14px; }
 .secondary-btn { background: var(--bg-main); color: var(--text-strong); border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; font-weight: 500; cursor: pointer; transition: 0.2s; }
-.secondary-btn:hover { background: var(--border); }
+.secondary-btn:hover:not(:disabled) { background: var(--border); }
 .secondary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .text-danger { color: var(--danger) !important; }
 
@@ -60,7 +61,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Robo
 .section-header p { color: var(--text-muted); margin-top: 4px; }
 .date-display { font-weight: 600; color: var(--primary) !important; }
 
-/* --- Word Card Component (Reusable) --- */
+/* --- Word Card Component --- */
 .card-container { width: 100%; }
 .word-card { background: var(--bg-surface); border-radius: var(--radius-lg); padding: 40px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
 .word-header { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 24px; }
@@ -70,22 +71,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Robo
 .phonetic { font-size: 18px; color: var(--text-muted); font-family: monospace; }
 .badge { background: #F3F4F6; color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* Audio Controls */
+/* Audio Controls & Animation */
 .audio-group { display: flex; gap: 10px; }
 .audio-btn { display: flex; align-items: center; gap: 6px; background: #EEF2FF; color: var(--primary); border: none; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-.audio-btn:hover { background: #E0E7FF; }
-.audio-btn i { font-size: 16px; }
+.audio-btn:hover { background: #D1D5DB; }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); } 100% { box-shadow: 0 0 0 8px rgba(79, 70, 229, 0); } }
+.audio-btn.playing { animation: pulse-ring 1s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; background: var(--primary); color: white; }
 
 /* Meanings */
 .meaning-block { margin-bottom: 24px; }
 .definition { font-size: 18px; color: var(--text-strong); margin-bottom: 8px; }
 .example { font-size: 16px; font-style: italic; color: var(--text-muted); border-left: 3px solid var(--border); padding-left: 16px; margin-top: 8px; }
 
-/* Thesaurus */
+/* Clickable Thesaurus */
 .thesaurus-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.syn-tag, .ant-tag { padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; }
-.syn-tag { background: #ECFDF5; color: var(--success); }
-.ant-tag { background: #FEF2F2; color: var(--danger); }
+.syn-tag, .ant-tag { padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+.syn-tag { background: #ECFDF5; color: var(--success); border: 1px solid #A7F3D0; }
+.ant-tag { background: #FEF2F2; color: var(--danger); border: 1px solid #FECACA; }
+.syn-tag:hover, .ant-tag:hover { transform: translateY(-2px); filter: brightness(0.95); box-shadow: var(--shadow-sm); }
 .thesaurus-label { display: block; font-size: 14px; font-weight: 600; margin-top: 24px; color: var(--text-muted); }
 
 /* Card Controls (For Practice) */
@@ -98,6 +101,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Robo
 .search-bar:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
 .search-bar i { font-size: 24px; color: var(--text-muted); padding: 0 16px; }
 .search-bar input { flex-grow: 1; border: none; font-size: 18px; outline: none; background: transparent; padding: 12px 0; color: var(--text-strong); }
+
+/* Search History */
+.search-history { margin-top: 16px; padding: 0 4px; }
+.history-label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+.history-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.history-pill { background: #F3F4F6; color: var(--text-base); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.2s; border: 1px solid var(--border); }
+.history-pill:hover { background: var(--text-muted); color: white; border-color: var(--text-muted); }
+
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
 .empty-state i { font-size: 48px; color: var(--border); margin-bottom: 16px; }
 
@@ -108,76 +119,34 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Robo
 .trending-card h3 { font-size: 24px; font-weight: 700; color: var(--text-strong); text-transform: capitalize; margin-bottom: 8px; }
 .trending-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
 .trending-stats { font-size: 12px; font-weight: 600; color: var(--primary); background: #EEF2FF; padding: 4px 8px; border-radius: 6px; align-self: flex-start; }
-.loader { text-align: center; color: var(--text-muted); padding: 40px; font-weight: 500; }
+
+.loader { text-align: center; color: var(--text-muted); padding: 40px; font-size: 16px; font-weight: 500; }
+.loader i { font-size: 24px; vertical-align: middle; margin-right: 8px; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 /* --- Responsiveness & Mobile Bottom Nav --- */
 @media (max-width: 768px) {
-    /* Make room for the bottom nav bar */
-    .app-layout { 
-        flex-direction: column; 
-        padding-bottom: 70px; 
-    }
+    .desktop-only { display: none; }
+    .app-layout { flex-direction: column; padding-bottom: 70px; }
     
-    /* Turn sidebar into a top header */
-    .sidebar { 
-        width: 100%; 
-        height: 65px;
-        flex-direction: row; 
-        border-right: none; 
-        border-bottom: 1px solid var(--border); 
-        padding: 0 20px; 
-        justify-content: space-between; 
-        align-items: center; 
-    }
-    
+    .sidebar { width: 100%; height: 65px; flex-direction: row; border-right: none; border-bottom: 1px solid var(--border); padding: 0 20px; justify-content: space-between; align-items: center; }
     .sidebar-header .logo { margin-bottom: 0; padding-left: 0; }
     
-    /* Keep logout in the top right, hide the text, show the icon */
     .sidebar-footer { margin: 0; }
     .sidebar-footer .nav-item { padding: 8px; font-size: 0; }
     .sidebar-footer .nav-item i { font-size: 24px; margin: 0; }
 
-    /* The Magic: Turn the menu into a fixed Bottom Navigation Bar */
-    .nav-menu { 
-        display: flex;
-        flex-direction: row;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: var(--bg-surface);
-        border-top: 1px solid var(--border);
-        justify-content: space-around;
-        padding: 10px 0;
-        /* Adds extra padding at the bottom for iPhones with the home indicator */
-        padding-bottom: calc(10px + env(safe-area-inset-bottom));
-        z-index: 100;
-        box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-    
-    .nav-menu .nav-item {
-        flex-direction: column; /* Stack icon above text */
-        gap: 4px;
-        padding: 4px 8px;
-        font-size: 11px; /* Smaller text for mobile tabs */
-        width: auto;
-        text-align: center;
-        background: transparent;
-    }
-    
+    /* Bottom Navigation Bar */
+    .nav-menu { display: flex; flex-direction: row; position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-surface); border-top: 1px solid var(--border); justify-content: space-around; padding: 10px 0; padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 100; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .nav-menu .nav-item { flex-direction: column; gap: 4px; padding: 4px 8px; font-size: 11px; width: auto; text-align: center; background: transparent; }
     .nav-menu .nav-item i { font-size: 24px; margin-bottom: 2px; }
-    
-    /* Ensure the active state looks good on bottom tabs */
     .nav-menu .nav-item.active { background: transparent; color: var(--primary); }
 
-    /* Shrink the main content paddings slightly */
     .main-content { padding: 20px; }
     .word-card { padding: 24px; }
     .word-title { font-size: 32px; }
     .word-meta { flex-direction: column; align-items: flex-start; gap: 8px; }
-    
     .card-controls { flex-direction: column; gap: 12px; }
     .card-controls button { width: 100%; }
 }
