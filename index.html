@@ -223,40 +223,44 @@
         }
 
         async function login() {
-    const username = usernameInput.value;
-    const password = passwordInput.value;
-    authError.textContent = '';
-    loginBtn.textContent = 'Signing in...';
-
-    try {
-        // Updated to hit your specific token generation endpoint
-        const response = await fetch(`${API_BASE}/api-auth/login/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
-
-        if (!response.ok) {
-            throw new Error('Invalid credentials or network issue');
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            authError.textContent = '';
+            loginBtn.textContent = 'Signing in...';
+        
+            try {
+                // Hitting the SimpleJWT token endpoint directly
+                const response = await fetch(`${API_BASE}/api/token/`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+        
+                if (!response.ok) {
+                    // Attempt to grab the specific error message from DRF
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || 'Invalid username or password');
+                }
+        
+                const data = await response.json();
+                
+                // SimpleJWT returns 'access' and 'refresh' payload keys
+                localStorage.setItem('access_token', data.access);
+                localStorage.setItem('refresh_token', data.refresh);
+                
+                // Switch views to the Lexicon dashboard
+                checkAuth();
+                
+            } catch (error) {
+                authError.textContent = error.message;
+            } finally {
+                loginBtn.textContent = 'Sign In';
+            }
         }
-
-        const data = await response.json();
         
-        // Storing the token (adjust 'data.access' if your API returns it as 'data.token')
-        localStorage.setItem('access_token', data.access || data.token);
-        
-        // If your endpoint also returns a refresh token, store it
-        if (data.refresh) {
-            localStorage.setItem('refresh_token', data.refresh);
-        }
-        
-        checkAuth();
-    } catch (error) {
-        authError.textContent = error.message;
-    } finally {
-        loginBtn.textContent = 'Sign In';
-    }
-}
         function logout() {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
