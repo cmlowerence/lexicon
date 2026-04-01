@@ -25,9 +25,14 @@ const searchBtn = document.getElementById('search-btn');
 const searchResultContainer = document.getElementById('search-result-container');
 const trendingContainer = document.getElementById('trending-container');
 
+// Search History Elements
+const searchHistoryContainer = document.getElementById('search-history-container');
+const recentSearchesList = document.getElementById('recent-searches-list');
+
 // --- Global State ---
 let practiceWords = [];
 let currentPracticeIndex = 0;
+let currentActiveSection = 'wotd-section';
 
 // --- Authentication Logic ---
 function checkAuth() {
@@ -36,6 +41,7 @@ function checkAuth() {
         authView.classList.add('hidden');
         appView.classList.remove('hidden');
         loadSection('wotd-section'); // Default view
+        renderSearchHistory();
     } else {
         appView.classList.add('hidden');
         authView.classList.remove('hidden');
@@ -100,7 +106,6 @@ async function fetchWithAuth(endpoint) {
         headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    // Basic Token Refresh Handling
     if (response.status === 401) {
         const refresh = localStorage.getItem('refresh_token');
         if (!refresh) { logout(); throw new Error('Session expired'); }
@@ -115,7 +120,6 @@ async function fetchWithAuth(endpoint) {
             const data = await refreshRes.json();
             localStorage.setItem('access_token', data.access);
             token = data.access;
-            // Retry request
             response = await fetch(`${API_BASE}${endpoint}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -135,33 +139,78 @@ async function fetchWithAuth(endpoint) {
 
 // --- Navigation & Routing ---
 function loadSection(sectionId) {
-    // UI Update
+    currentActiveSection = sectionId;
     sections.forEach(sec => sec.classList.add('hidden'));
     document.getElementById(sectionId).classList.remove('hidden');
     
     navItems.forEach(nav => nav.classList.remove('active'));
     document.querySelector(`.nav-item[data-target="${sectionId}"]`)?.classList.add('active');
 
-    // Data Loading
+    // Trigger data fetching based on section
     if (sectionId === 'wotd-section') fetchWOTD();
     if (sectionId === 'practice-section') fetchPracticeSet();
     if (sectionId === 'trending-section') fetchTrending();
-    // Search handles its own data fetching on click/enter
 }
 
 // --- Global Audio Handler ---
-function playAudio(url) {
-    new Audio(url).play().catch(e => console.error("Error playing audio:", e));
+function playAudio(btnElement, url) {
+    const audio = new Audio(url);
+    
+    // Add visual feedback
+    btnElement.classList.add('playing');
+    
+    audio.play().catch(e => {
+        console.error("Error playing audio:", e);
+        btnElement.classList.remove('playing');
+    });
+
+    // Remove feedback when done
+    audio.onended = () => {
+        btnElement.classList.remove('playing');
+    };
 }
+
+// --- Recent Search History Logic ---
+function saveToSearchHistory(word) {
+    let history = JSON.parse(localStorage.getItem('lexicon_history') || '[]');
+    // Remove if already exists to move it to the front
+    history = history.filter(w => w.toLowerCase() !== word.toLowerCase());
+    history.unshift(word);
+    // Keep only last 10 searches
+    if (history.length > 10) history.pop();
+    
+    localStorage.setItem('lexicon_history', JSON.stringify(history));
+    renderSearchHistory();
+}
+
+function renderSearchHistory() {
+    const history = JSON.parse(localStorage.getItem('lexicon_history') || '[]');
+    if (history.length > 0) {
+        searchHistoryContainer.classList.remove('hidden');
+        recentSearchesList.innerHTML = history.map(word => 
+            `<div class="history-pill" onclick="searchFromTag('${word}')"><i class="ph ph-clock-counter-clockwise"></i> ${word}</div>`
+        ).join('');
+    } else {
+        searchHistoryContainer.classList.add('hidden');
+    }
+}
+
+// --- Deep Linking: Search from Tags/Synonyms ---
+window.searchFromTag = function(wordText) {
+    loadSection('search-section');
+    searchInput.value = wordText;
+    executeSearch();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
 
 // --- UI Components ---
 function generateWordCardHTML(word, context = 'default') {
     if (!word) return '<div class="error-msg">Word data unavailable.</div>';
 
-    // 1. Process Pronunciations (Prioritize UK/British accent based on preferences, otherwise fallback to US/GEN)
+    // 1. Process Pronunciations 
     let audioControls = '';
     if (word.pronunciations && word.pronunciations.length > 0) {
-        // Sort pronunciations: UK first, then US, then others
         const sortedProns = [...word.pronunciations].sort((a, b) => {
             if (a.region === 'UK') return -1;
             if (b.region === 'UK') return 1;
@@ -170,7 +219,7 @@ function generateWordCardHTML(word, context = 'default') {
         });
 
         audioControls = sortedProns.map(p => `
-            <button class="audio-btn" onclick="playAudio('${p.audio_url}')" title="${p.region} Pronunciation">
+            <button class="audio-btn" onclick="playAudio(this, '${p.audio_url}')" title="${p.region} Pronunciation">
                 <i class="ph-fill ph-speaker-high"></i> ${p.region}
             </button>
         `).join('');
@@ -185,18 +234,18 @@ function generateWordCardHTML(word, context = 'default') {
         </div>
     `).join('');
 
-    // 3. Process Thesaurus
-    const synonyms = (word.thesaurus_entries || []).filter(t => t.relation_type === 'SYN').slice(0, 6);
-    const antonyms = (word.thesaurus_entries || []).filter(t => t.relation_type === 'ANT').slice(0, 6);
+    // 3. Process Thesaurus (NEW: Clickable Tags)
+    const synonyms = (word.thesaurus_entries || []).filter(t => t.relation_type === 'SYN').slice(0, 8);
+    const antonyms = (word.thesaurus_entries || []).filter(t => t.relation_type === 'ANT').slice(0, 8);
     
     let thesaurusHtml = '';
     if (synonyms.length > 0) {
-        thesaurusHtml += `<span class="thesaurus-label">Synonyms</span><div class="thesaurus-grid">` + 
-            synonyms.map(t => `<span class="syn-tag">${t.related_word}</span>`).join('') + `</div>`;
+        thesaurusHtml += `<span class="thesaurus-label">Synonyms (Click to search)</span><div class="thesaurus-grid">` + 
+            synonyms.map(t => `<span class="syn-tag" onclick="searchFromTag('${t.related_word}')">${t.related_word} <i class="ph ph-arrow-up-right"></i></span>`).join('') + `</div>`;
     }
     if (antonyms.length > 0) {
-        thesaurusHtml += `<span class="thesaurus-label">Antonyms</span><div class="thesaurus-grid">` + 
-            antonyms.map(t => `<span class="ant-tag">${t.related_word}</span>`).join('') + `</div>`;
+        thesaurusHtml += `<span class="thesaurus-label">Antonyms (Click to search)</span><div class="thesaurus-grid">` + 
+            antonyms.map(t => `<span class="ant-tag" onclick="searchFromTag('${t.related_word}')">${t.related_word} <i class="ph ph-arrow-up-right"></i></span>`).join('') + `</div>`;
     }
 
     // 4. Build Card
@@ -209,7 +258,7 @@ function generateWordCardHTML(word, context = 'default') {
                 <div class="word-meta">
                     ${word.phonetic_text ? `<span class="phonetic">${word.phonetic_text}</span>` : ''}
                     <div class="audio-group">${audioControls}</div>
-                    ${word.is_sophisticated ? `<span class="badge" style="background: #FEF3C7; color: #D97706;">Sophisticated</span>` : ''}
+                    ${word.is_sophisticated ? `<span class="badge" style="background: #FEF3C7; color: #D97706;"><i class="ph-fill ph-sparkle"></i> Sophisticated</span>` : ''}
                 </div>
             </div>
             
@@ -225,8 +274,8 @@ function generateWordCardHTML(word, context = 'default') {
         const isLast = currentPracticeIndex === practiceWords.length - 1;
         cardHtml += `
             <div class="card-controls">
-                <button class="secondary-btn" id="prev-btn" ${isFirst ? 'disabled' : ''} onclick="navigatePractice(-1)">Previous</button>
-                <button class="secondary-btn" id="next-btn" ${isLast ? 'disabled' : ''} onclick="navigatePractice(1)">Next</button>
+                <button class="secondary-btn" id="prev-btn" ${isFirst ? 'disabled' : ''} onclick="navigatePractice(-1)">Previous Word</button>
+                <button class="secondary-btn" id="next-btn" ${isLast ? 'disabled' : ''} onclick="navigatePractice(1)">Next Word</button>
             </div>
             <div class="card-counter">${currentPracticeIndex + 1} of ${practiceWords.length} Words</div>
         `;
@@ -255,11 +304,11 @@ async function fetchWOTD() {
 
 async function fetchPracticeSet() {
     if (practiceWords.length > 0) {
-        renderPracticeCard(); // Don't refetch if already loaded
+        renderPracticeCard(); 
         return;
     }
 
-    practiceContainer.innerHTML = '<div class="loader"><i class="ph ph-spinner ph-spin"></i> Loading your daily set...</div>';
+    practiceContainer.innerHTML = '<div class="loader"><i class="ph ph-spinner ph-spin"></i> Generating your daily set...</div>';
     try {
         const data = await fetchWithAuth('/api/v2/lexicon/public/daily-practice/');
         if (data && data.words && data.words.length > 0) {
@@ -278,9 +327,9 @@ function renderPracticeCard() {
     if (practiceWords.length === 0) return;
     const word = practiceWords[currentPracticeIndex];
     practiceContainer.innerHTML = generateWordCardHTML(word, 'practice');
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Reset scroll to top of card
 }
 
-// Global function for onclick attributes in Practice mode
 window.navigatePractice = function(direction) {
     const newIndex = currentPracticeIndex + direction;
     if (newIndex >= 0 && newIndex < practiceWords.length) {
@@ -299,6 +348,10 @@ async function executeSearch() {
     try {
         const data = await fetchWithAuth(`/api/v2/lexicon/public/search/?word=${encodeURIComponent(query)}&lang=en`);
         searchResultContainer.innerHTML = generateWordCardHTML(data, 'default');
+        
+        // Save successful search to history
+        saveToSearchHistory(data.text);
+
     } catch (err) {
         searchResultContainer.innerHTML = `
             <div class="empty-state">
@@ -317,7 +370,7 @@ async function fetchTrending() {
         const data = await fetchWithAuth('/api/v2/lexicon/public/trending/');
         if (data && data.length > 0) {
             trendingContainer.innerHTML = data.map(word => `
-                <div class="trending-card" onclick="loadTrendingWordToSearch('${word.text}')">
+                <div class="trending-card" onclick="searchFromTag('${word.text}')">
                     <div>
                         <h3>${word.text}</h3>
                         <p>${word.meanings?.[0]?.definition?.substring(0, 60) || 'No definition available'}...</p>
@@ -332,12 +385,6 @@ async function fetchTrending() {
         trendingContainer.innerHTML = `<div class="error-msg">Failed to load trending words.</div>`;
     }
 }
-
-window.loadTrendingWordToSearch = function(wordText) {
-    loadSection('search-section');
-    searchInput.value = wordText;
-    executeSearch();
-};
 
 
 // --- Event Listeners ---
@@ -354,6 +401,17 @@ navItems.forEach(item => {
 
 searchBtn.addEventListener('click', executeSearch);
 searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') executeSearch(); });
+
+// Keyboard Navigation for Practice Mode
+document.addEventListener('keydown', (e) => {
+    if (currentActiveSection === 'practice-section' && document.activeElement !== searchInput) {
+        if (e.key === 'ArrowLeft') {
+            navigatePractice(-1);
+        } else if (e.key === 'ArrowRight') {
+            navigatePractice(1);
+        }
+    }
+});
 
 // Initialize
 checkAuth();
