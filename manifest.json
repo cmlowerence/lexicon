@@ -2,7 +2,7 @@
   "name": "Lexicon by QubitGyan",
   "short_name": "Lexicon",
   "description": "Expand your vocabulary with daily practice and comprehensive dictionary tools.",
-  "start_url": "./index.html",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#F9FAFB",
   "theme_color": "#881337",
